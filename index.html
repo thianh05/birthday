@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday Celebration ✨</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #ff3366;
+      --led-glow: #ff0055;
+      --bg-overlay: rgba(10, 10, 20, 0.55);
+      --card-bg: #fdfdfd;
+      --polaroid-shadow: 0 16px 38px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+    min-height: 100vh;
+    font-family: 'Roboto', Arial, sans-serif;
+    color: #fff;
+    background-color: #0d0b18;
+    background-image: url('background/starnight.svg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    overflow-x: hidden;
+    position: relative;
+    transition: background-image 0.5s ease-in-out;
+    }
+
+    /* Ambient dynamic particles canvas */
+    #ambient-canvas, #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    #confetti-canvas {
+      z-index: 999;
+    }
+
+    .app-container {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 60px;
+      backdrop-filter: blur(1px);
+    }
+
+    /* Top control toolbar */
+    .top-toolbar {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: calc(100% - 24px);
+      overflow-x: auto;
+      scrollbar-width: none;
+      z-index: 100;
+      display: flex;
+      gap: 8px;
+      background: rgba(18, 16, 32, 0.75);
+      backdrop-filter: blur(12px);
+      padding: 8px 14px;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+
+    .tool-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 8px 15px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .tool-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255, 51, 102, 0.4);
+    }
+
+    .tool-btn.primary {
+      background: linear-gradient(135deg, #ff3366, #ff758c);
+      border: none;
+      color: #fff;
+    }
+
+    .tool-btn.active {
+      background: #00f2fe;
+      color: #0b1220;
+      font-weight: 700;
+      border-color: #00f2fe;
+    }
+
+    /* HEADER & TITLE */
+    .main-title {
+      font-family: 'Roboto', Arial, sans-serif;
+      font-size: clamp(2.4rem, 6vw, 4.4rem);
+      text-align: center;
+      margin-top: 70px;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #ffe066, #ff70a6, #ff9770, #70d6ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 6px 16px rgba(255, 112, 166, 0.5));
+      animation: floatTitle 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatTitle {
+      0% { transform: translateY(0px) rotate(-1deg); }
+      100% { transform: translateY(-7px) rotate(1deg); }
+    }
+
+    .sub-title {
+      font-size: clamp(0.95rem, 2.2vw, 1.2rem);
+      color: rgba(255, 255, 255, 0.85);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 22px;
+      font-weight: 600;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+    }
+
+    /* LED RUNNING SIGN (BẢNG ĐÈN LED CHẠY CHỮ) */
+    .led-board-wrapper {
+      width: 100%;
+      max-width: 920px;
+      margin-bottom: 35px;
+      perspective: 1000px;
+    }
+
+    .led-sign {
+      position: relative;
+      background: #07070b;
+      border: 5px solid #201e2c;
+      border-radius: 16px;
+      box-shadow: 
+        0 0 0 2px #444,
+        0 14px 40px rgba(0, 0, 0, 0.85),
+        inset 0 0 25px rgba(0, 0, 0, 0.9),
+        0 0 35px rgba(255, 0, 85, 0.35);
+      padding: 12px 18px;
+      overflow: hidden;
+    }
+
+    .led-sign::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.08) 1.2px, transparent 1.2px);
+      background-size: 5px 5px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .led-sign::after {
+      content: "";
+      position: absolute;
+      top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      transform: skewX(-25deg);
+      animation: glassReflection 6s infinite ease-in-out;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    @keyframes glassReflection {
+      0%, 75% { left: -100%; }
+      100% { left: 200%; }
+    }
+
+    .led-track {
+      display: flex;
+      width: max-content;
+      animation: ledMarquee 16s linear infinite;
+      z-index: 1;
+    }
+
+    .led-track:hover {
+      animation-play-state: paused;
+    }
+
+    @keyframes ledMarquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .led-text-item {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+      padding-right: 35px;
+      font-family: 'Roboto', Arial, sans-serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: 4px;
+      color: #ff2a6d;
+      text-transform: uppercase;
+      text-shadow: 
+        0 0 3px #ff2a6d,
+        0 0 10px #ff2a6d,
+        0 0 20px #ff0055,
+        0 0 35px #ff0055;
+      animation: ledFlicker 2.5s infinite alternate;
+    }
+
+    .led-text-item .dot-divider {
+      color: #05d9e8;
+      text-shadow: 0 0 10px #05d9e8, 0 0 20px #05d9e8;
+      font-size: 0.8em;
+    }
+
+    @keyframes ledFlicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 12px #ff0055);
+      }
+      20%, 24%, 55% {
+        opacity: 0.45;
+        filter: none;
+      }
+    }
+
+    /* POLAROID CARDS DECK SECTION */
+    .deck-section {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+      position: relative;
+    }
+
+    .deck-hint {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 6px 18px;
+      border-radius: 20px;
+      margin-bottom: 25px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px dashed rgba(255, 255, 255, 0.25);
+    }
+
+    .deck-viewport {
+      width: 100%;
+      height: 480px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1400px;
+    }
+
+    /* The Deck Container holding Polaroid cards */
+    .deck-cards-container {
+      position: relative;
+      width: 270px;
+      height: 350px;
+    }
+
+    /* Individual Polaroid Card */
+    .polaroid-card {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 270px;
+      height: 350px;
+      background: #fdfdfd;
+      border-radius: 8px;
+      padding: 14px 14px 20px;
+      box-shadow: var(--polaroid-shadow);
+      display: flex;
+      flex-direction: column;
+      cursor: grab;
+      touch-action: none;
+      transform-origin: center bottom;
+      transition: transform 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28), box-shadow 0.3s ease, filter 0.3s ease;
+      z-index: 1;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .polaroid-card.is-dragging {
+      cursor: grabbing;
+      transition: none !important;
+      z-index: 9999 !important;
+      box-shadow: 0 30px 65px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 112, 166, 0.5) !important;
+      filter: brightness(1.05);
+    }
+
+    .polaroid-card.active-top {
+      z-index: 80;
+    }
+
+    .top-toolbar::-webkit-scrollbar { display: none; }
+    .top-toolbar .tool-btn { flex-shrink: 0; white-space: nowrap; }
+    .top-toolbar .tool-btn:hover { transform: none; }
+    .polaroid-card { transition: transform 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28), translate 0.3s ease, scale 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease; }
+    .polaroid-card.card-fanned:hover:not(.is-dragging) {
+      translate: 0 -30px;
+      scale: 1.06;
+      z-index: 150 !important;
+      box-shadow: 0 35px 70px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.4);
+    }
+
+    /* Fixed Square Frame */
+    .polaroid-photo-frame {
+      width: 242px;
+      height: 242px;
+      background: #111;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .polaroid-img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .polaroid-caption {
+      margin-top: 14px;
+      text-align: center;
+      font-family: 'Roboto', Arial, sans-serif;
+      font-size: 22px;
+      color: #2b2b2b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 700;
+    }
+
+    .polaroid-badge {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: #ff3366;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transform: rotate(6deg);
+      pointer-events: none;
+    }
+
+    /* Deck controls bar */
+    .deck-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 15px;
+      z-index: 10;
+    }
+
+    /* INTERACTIVE CAKE & WISH SECTION */
+    .interactive-section {
+      margin-top: 40px;
+      width: 100%;
+      max-width: 800px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 24px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.4);
+    }
+
+    .cake-container {
+      cursor: pointer;
+      position: relative;
+      margin: 10px 0;
+      transition: transform 0.25s ease;
+    }
+
+    .cake-container:hover {
+      transform: scale(1.06);
+    }
+
+    .cake-emoji {
+      font-size: 72px;
+      filter: drop-shadow(0 8px 18px rgba(255, 180, 0, 0.45));
+    }
+
+    .flame-particle {
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 18px;
+      background: radial-gradient(ellipse at bottom, #fff700, #ff5400, transparent);
+      border-radius: 50% 50% 20% 20%;
+      animation: flickerFlame 0.7s infinite alternate;
+      box-shadow: 0 0 15px #ff7b00;
+    }
+
+    @keyframes flickerFlame {
+      0% { transform: translateX(-50%) scale(1) rotate(-2deg); opacity: 0.9; }
+      100% { transform: translateX(-50%) scale(1.2) rotate(3deg); opacity: 1; }
+    }
+
+    .cake-hint {
+      font-size: 15px;
+      color: #ffeaa7;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .wish-text {
+      margin-top: 12px;
+      font-size: 17px;
+      line-height: 1.6;
+      color: #e2e8f0;
+      max-width: 600px;
+    }
+
+    /* MODAL STYLES (Editor, Cropper, Background) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 3, 10, 0.78);
+      backdrop-filter: blur(10px);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #191728;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 580px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      transform: translateY(20px) scale(0.96);
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+
+    .modal-overlay.open .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 12px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 51, 102, 0.6);
+    }
+
+    /* FORM ELEMENTS IN MODALS */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      background: #0f0d1b;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: #ff3366;
+      box-shadow: 0 0 12px rgba(255, 51, 102, 0.35);
+    }
+
+    /* SQUARE IMAGE CROPPER BOX */
+    .cropper-preview-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      background: #0c0a15;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+    }
+
+    /* Square frame strictly 260x260 for precision square cropping */
+    .crop-viewport {
+      width: 250px;
+      height: 250px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 6px;
+      background: #181524;
+      box-shadow: 0 0 0 2px #ff3366, 0 10px 25px rgba(0,0,0,0.5);
+      cursor: move;
+      touch-action: none;
+    }
+
+    .crop-viewport::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 1px dashed rgba(255, 255, 255, 0.4);
+      pointer-events: none;
+    }
+
+    .crop-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    .crop-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .crop-controls span {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .range-slider {
+      flex: 1;
+      accent-color: #ff3366;
+    }
+
+    /* PHOTO LIST IN EDIT MODAL */
+    .photo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .photo-list-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 8px 12px;
+      border-radius: 10px;
+    }
+
+    .item-thumb {
+      width: 46px;
+      height: 46px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #000;
+      border: 1px solid #fff;
+    }
+
+    .item-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .item-caption-text {
+      font-weight: 600;
+      font-size: 14px;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .item-btn {
+      background: rgba(255,255,255,0.12);
+      border: none;
+      color: #fff;
+      padding: 5px 9px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .item-btn.delete:hover {
+      background: #e63946;
+    }
+
+    /* BACKGROUND PICKER TILES */
+    .bg-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    .bg-tile {
+      height: 90px;
+      border-radius: 12px;
+      background-size: cover;
+      background-position: center;
+      border: 2px solid transparent;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: flex-end;
+      padding: 8px;
+    }
+
+    .bg-tile:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    .bg-tile.active {
+      border-color: #00f2fe;
+      box-shadow: 0 0 16px rgba(0, 242, 254, 0.7);
+    }
+
+    .bg-tile span {
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* TOAST ALERT */
+    .toast-notice {
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #111;
+      border: 1px solid #00f2fe;
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 242, 254, 0.4);
+      z-index: 100000;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      pointer-events: none;
+    }
+
+    .toast-notice.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* POLAROID 3D FLIP MECHANISM */
+    .polaroid-card {
+      perspective: 1000px;
+    }
+
+    .polaroid-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    .polaroid-card.is-flipped .polaroid-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .polaroid-front, .polaroid-back {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      border-radius: 8px;
+    }
+
+    .polaroid-back {
+      transform: rotateY(180deg);
+      background: #faf7ee;
+      background-image: repeating-linear-gradient(transparent, transparent 23px, #e5e0d4 24px);
+      padding: 20px 16px;
+      color: #3b3a36;
+      border: 1px solid #e2ddd0;
+    }
+
+    .polaroid-back-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px dashed #d1c7b7;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    .polaroid-stamp {
+      width: 36px;
+      height: 42px;
+      border: 2px dashed #ff3366;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: rgba(255, 51, 102, 0.08);
+      transform: rotate(5deg);
+    }
+
+    .polaroid-back-text {
+      font-family: 'Caveat', cursive;
+      font-size: 20px;
+      line-height: 24px;
+      color: #2c2825;
+      flex: 1;
+      overflow-y: auto;
+      word-break: break-word;
+    }
+
+    .polaroid-flip-btn {
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #201e2c;
+      color: #00f2fe;
+      border: 1px solid rgba(0, 242, 254, 0.4);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      transition: all 0.2s;
+      z-index: 5;
+    }
+
+    .polaroid-flip-btn:hover {
+      background: #00f2fe;
+      color: #000;
+    }
+
+    /* GIFT BOX MODAL & LETTER */
+    .gift-box-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 10px;
+    }
+
+    .gift-box-icon {
+      font-size: 80px;
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      animation: giftBounce 2s infinite ease-in-out;
+      filter: drop-shadow(0 10px 25px rgba(255, 51, 102, 0.5));
+    }
+
+    .gift-box-icon:hover {
+      transform: scale(1.15) rotate(-5deg);
+    }
+
+    @keyframes giftBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .secret-letter {
+      background: #fffdf7;
+      color: #2d3748;
+      border-radius: 16px;
+      padding: 25px 22px;
+      margin-top: 15px;
+      border: 1px solid #ebdcb9;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      max-height: 280px;
+      overflow-y: auto;
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
+      line-height: 1.5;
+    }
+
+    /* Sound indicator pulse */
+    .sound-badge {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      margin-left: 4px;
+      box-shadow: 0 0 6px #10b981;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .top-toolbar {
+        top: 8px;
+        padding: 6px 8px;
+        border-radius: 14px;
+      }
+      .top-toolbar .tool-btn { padding: 7px 12px; font-size: 12px; }
+      .main-title {
+        margin-top: 60px;
+      }
+      .deck-viewport {
+        height: 400px;
+      }
+      .deck-cards-container { transform: scale(0.78); }
+      .deck-controls .tool-btn { padding: 7px 12px; font-size: 12px; }
+      .modal-card { padding: 18px; }
+    }
+    @media (max-width: 400px) {
+      .deck-cards-container { transform: scale(0.66); }
+      .deck-viewport { height: 340px; }
+      .bg-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Particles Canvas (Floating sparkles, hearts, stars) -->
+  <canvas id="ambient-canvas"></canvas>
+  <!-- Confetti Canvas for Fireworks explosion -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Top action toolbar -->
+  <div class="top-toolbar">
+    <button class="tool-btn" id="btn-toggle-sound" title="Bật/Tắt âm thanh click">
+     Âm thanh <span class="sound-badge" id="sound-indicator"></span>
+    </button>
+    <button class="tool-btn" id="btn-toggle-music" title="Bật/Tắt giai điệu nhạc Happy Birthday hộp nhạc">
+     Nhạc nền
+    </button>
+    <button class="tool-btn" id="btn-open-gift" title="Mở hộp quà bí mật">
+    Hộp quà
+    </button>
+    <button class="tool-btn" id="btn-toggle-bg" title="Đổi background">
+    Hình nền
+    </button>
+    <button class="tool-btn" id="btn-edit-content" title="Sửa chữ LED & Chèn ảnh Polaroid">
+    Chỉnh sửa & Thêm ảnh
+    </button>
+    <button class="tool-btn" id="btn-export-html" title="Tải về file trang web thành phẩm để gửi tặng">
+    Xuất file gửi tặng
+    </button>
+    <button class="tool-btn primary" id="btn-save-view" title="Lưu và xem trang web thành phẩm">
+    Lưu & Thành phẩm
+    </button>
+  </div>
+
+  <main class="app-container">
+    <!-- Main Decorative Header -->
+    <h1 class="main-title" id="display-title">Happy Birthday! 🎂</h1>
+    <p class="sub-title" id="display-subtitle">Chúc bạn một tuổi mới rực rỡ và ngập tràn hạnh phúc ✨</p>
+
+    <!-- LED TICKER MARQUEE (BẢNG ĐÈN LED CHẠY CHỮ) -->
+    <section class="led-board-wrapper" title="Dòng chữ đèn LED nhấp nháy chuyển động">
+      <div class="led-sign">
+        <div class="led-track" id="led-track">
+          <!-- Populated by JavaScript with blinking neon led text -->
+        </div>
+      </div>
+    </section>
+
+    <!-- POLAROID CARDS DECK (HIỆU ỨNG DÀN BÀI & KÉO TỪNG BỨC ẢNH) -->
+    <section class="deck-section">
+      <div class="deck-hint">
+        🃏 <span><b>Kéo ảnh lên như kéo bài</b>, click để xem rõ hoặc bấm nút xòe / gom bài bên dưới!</span>
+      </div>
+
+      <div class="deck-viewport" id="deck-viewport">
+        <div class="deck-cards-container" id="deck-container">
+          <!-- Polaroid cards injected here -->
+        </div>
+      </div>
+
+      <!-- Action buttons for the deck -->
+      <div class="deck-controls">
+        <button class="tool-btn" id="btn-fan-cards">Xòe bài ra</button>
+        <button class="tool-btn" id="btn-stack-cards">Gom bài lại</button>
+        <button class="tool-btn" id="btn-next-card">Kéo lá kế tiếp</button>
+        <button class="tool-btn" id="btn-random-scatter">Rải ngẫu nhiên</button>
+        <button class="tool-btn primary" id="btn-add-quick-photo">Thêm ảnh của bạn</button>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE BIRTHDAY CAKE & WISH -->
+    <section class="interactive-section">
+      <div class="cake-container" id="birthday-cake" title="Click để thổi nến và bắn pháo hoa giấy!">
+        <div class="flame-particle" id="candle-flame"></div>
+        <div class="cake-emoji">🎂</div>
+      </div>
+      <div class="cake-hint" id="cake-status-text">Click vào chiếc bánh để thổi nến & bắn pháo hoa giấy! 🎉</div>
+      <p class="wish-text" id="display-wish">
+        "Chúc tuổi mới luôn rạng ngời nụ cười, luôn tự tin bước đi trên con đường mình chọn và gặp thật nhiều may mắn, yêu thương!"
+      </p>
+    </section>
+  </main>
+
+  <!-- MODAL 1: CHỈNH SỬA NỘI DUNG & QUẢN LÝ ẢNH POLAROID -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Chỉnh sửa nội dung & Bộ ảnh</div>
+        <button class="modal-close" data-close="edit-modal">&times;</button>
+      </div>
+
+      <!-- Tiêu đề & Lời chúc -->
+      <div class="form-group">
+        <label class="form-label">Tiêu đề chính:</label>
+        <input type="text" class="form-input" id="input-title" placeholder="VD: Happy Birthday Chloe! ">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Dòng chữ phụ:</label>
+        <input type="text" class="form-input" id="input-subtitle" placeholder="VD: Chúc bạn tuổi 20 thật rực rỡ!">
+      </div>
+
+      <!-- Nội dung bảng đèn LED -->
+      <div class="form-group">
+        <label class="form-label">Nội dung đèn LED chạy nhấp nháy (ngăn cách bằng dấu phẩy hoặc chấm):</label>
+        <textarea class="form-textarea" id="input-led-text" rows="2" placeholder="HAPPY BIRTHDAY • TUỔI MỚI THÀNH CÔNG • VẠN SỰ NHƯ Ý • LUÔN XINH ĐẸP"></textarea>
+      </div>
+
+      <!-- Lời chúc tâm tình -->
+      <div class="form-group">
+        <label class="form-label">Lời chúc mừng sinh nhật:</label>
+        <textarea class="form-textarea" id="input-wish-text" rows="2" placeholder="Điền lời chúc ý nghĩa của bạn..."></textarea>
+      </div>
+
+      <!-- Bức thư bí mật trong hộp quà -->
+      <div class="form-group">
+        <label class="form-label">Bức thư bí mật giấu trong Hộp Quà:</label>
+        <textarea class="form-textarea" id="input-secret-letter" rows="3" placeholder="Viết những tâm tư tình cảm đặc biệt muốn gửi riêng cho chủ nhân bữa tiệc..."></textarea>
+      </div>
+
+      <!-- Quản lý ảnh Polaroid -->
+      <div class="form-group">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="form-label">Danh sách ảnh Polaroid (<span id="photo-count">0</span> ảnh):</label>
+          <button class="tool-btn primary" id="btn-open-cropper-from-modal" style="padding:4px 12px; font-size:12px;">+ Thêm & Cắt ảnh vuông</button>
+        </div>
+        <div class="photo-list" id="modal-photo-list">
+          <!-- Populated items -->
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+        <button class="tool-btn" data-close="edit-modal">Đóng</button>
+        <button class="tool-btn primary" id="btn-save-settings">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: SQUARE IMAGE CROPPER & POSITION ADJUSTER (TỰ CẮT ẢNH VUÔNG) -->
+  <div class="modal-overlay" id="cropper-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Điều chỉnh & Cắt ảnh vuông Polaroid</div>
+        <button class="modal-close" data-close="cropper-modal">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Chọn ảnh từ máy của bạn:</label>
+        <input type="file" id="file-photo-input" accept="image/*" class="form-input">
+      </div>
+
+      <!-- Interactive Square Viewport -->
+      <div class="cropper-preview-container">
+        <p style="font-size:12px; color:#cbd5e1;">🖱️ <b>Kéo rê chuột</b> để chỉnh vị trí ảnh, dùng thanh trượt để <b>phóng to / thu nhỏ</b>:</p>
+        <div class="crop-viewport" id="crop-viewport">
+          <img id="crop-preview-img" class="crop-image" src="" alt="Preview">
+        </div>
+
+        <div class="crop-controls">
+          <span>🔍 Thu nhỏ</span>
+          <input type="range" id="crop-zoom-slider" class="range-slider" min="1" max="3" step="0.05" value="1">
+          <span>Phóng to</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Ghi chú ảnh (dưới khung Polaroid):</label>
+        <input type="text" class="form-input" id="input-photo-caption" placeholder="VD: Nụ cười tỏa nắng ✨ / Kỷ niệm Đà Lạt 2026">
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="tool-btn" data-close="cropper-modal">Hủy</button>
+        <button class="tool-btn primary" id="btn-confirm-crop">Lưu ảnh vào Album</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: BACKGROUND PICKER (TỪ THƯ MỤC BACKGROUND HOẶC TẢI LÊN) -->
+  <div class="modal-overlay" id="bg-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Chọn giao diện Background</div>
+        <button class="modal-close" data-close="bg-modal">&times;</button>
+      </div>
+
+      <p style="font-size:13px; color:#cbd5e1;">
+        Bạn có thể chọn các hình nền có sẵn trong thư mục <code>background/</code> hoặc tải ảnh background tùy thích từ máy:
+      </p>
+
+      <!-- Preset backgrounds inside folder background/ -->
+      <div class="bg-grid" id="bg-grid">
+        <div class="bg-tile" data-bg="background/bg1.jpg" style="background-image: url('background/bg1.jpg');">
+          <span>🖼️ bg1.jpg (ảnh của bạn)</span>
+        </div>
+        <div class="bg-tile" data-bg="background/bg2.jpg" style="background-image: url('background/bg2.jpg');">
+          <span>🖼️ bg2.jpg (ảnh của bạn)</span>
+        </div>
+        <div class="bg-tile" data-bg="background/bg3.jpg" style="background-image: url('background/bg3.jpg');">
+          <span>🖼️ bg3.jpg (ảnh của bạn)</span>
+        </div>
+        <div class="bg-tile active" data-bg="background/starnight.svg" style="background-image: url('background/starnight.svg');">
+          <span>🌌 Đêm sao lung linh (starnight.svg)</span>
+        </div>
+        <div class="bg-tile" data-bg="background/dreamy-sunset.svg" style="background-image: url('background/dreamy-sunset.svg');">
+          <span>🔮 Hoàng hôn mộng mơ (dreamy-sunset.svg)</span>
+        </div>
+        <div class="bg-tile" data-bg="background/cyber-party.svg" style="background-image: url('background/cyber-party.svg');">
+          <span>⚡ Retro Cyber Party (cyber-party.svg)</span>
+        </div>
+        <div class="bg-tile" data-bg="background/warm-bokeh.svg" style="background-image: url('background/warm-bokeh.svg');">
+          <span>✨ Warm Bokeh Party (warm-bokeh.svg)</span>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:10px;">
+        <label class="form-label">Hoặc nhập đường dẫn ảnh trong folder background:</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" class="form-input" id="custom-bg-path" placeholder="background/ten-anh-cua-ban.jpg" style="flex:1;">
+          <button class="tool-btn" id="btn-apply-custom-path">Áp dụng</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Hoặc chọn file ảnh background từ máy tính:</label>
+        <input type="file" id="custom-bg-file" accept="image/*" class="form-input">
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="tool-btn primary" data-close="bg-modal">Xong</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: SURPRISE GIFT BOX & SECRET LETTER -->
+  <div class="modal-overlay" id="gift-modal">
+    <div class="modal-card" style="text-align: center;">
+      <div class="modal-header">
+        <div class="modal-title">🎁 Hộp Quà Bí Mật Dành Riêng Cho Bạn</div>
+        <button class="modal-close" data-close="gift-modal">&times;</button>
+      </div>
+
+      <div class="gift-box-stage">
+        <div class="gift-box-icon" id="gift-box-clicker" title="Bấm vào để mở hộp quà!">🎁</div>
+        <div style="font-size:14px; color:#ffeaa7; margin-top:10px; font-weight:600;" id="gift-box-hint">
+          ✨ Bấm vào hộp quà để mở điều bất ngờ!
+        </div>
+        
+        <div class="secret-letter" id="secret-letter-box" style="display:none; text-align:left;">
+          <div style="text-align:right; font-size:16px; color:#ff3366; margin-bottom:6px;">💌 Gửi người đặc biệt nhất,</div>
+          <p id="display-secret-letter" style="white-space: pre-line;">
+            Chúc mừng sinh nhật! Cảm ơn vì đã luôn mang lại niềm vui, sự ấm áp và những nụ cười cho mọi người xung quanh. Chúc cho tất cả những điều bạn mong ước trong năm nay đều sẽ biến thành hiện thực rực rỡ nhất! 💖🎂
+          </p>
+          <div style="text-align:right; margin-top:12px; font-weight:bold; font-size:18px;">From your best friend with all love ❤️</div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:10px;">
+        <button class="tool-btn primary" data-close="gift-modal">Đóng hộp quà</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast-notice" id="toast-notice">Đã lưu thành công!</div>
+
+  <script>
+    /* =========================================================================
+       1. SYNTHESIZED WEB AUDIO SOUND SYSTEM (NO HEAVY ASSETS NEEDED, ZERO LAG)
+       ========================================================================= */
+    const SoundEffects = (() => {
+      let audioCtx = null;
+      let soundEnabled = true;
+
+      function getContext() {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      }
+
+      // Crisp click pop sound on every user interaction
+      function playClickSound() {
+        if (!soundEnabled) return;
+        try {
+          const ctx = getContext();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const now = ctx.currentTime;
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(540, now);
+          osc.frequency.exponentialRampToValueAtTime(180, now + 0.06);
+
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.06);
+        } catch(e) {}
+      }
+
+      // Card whoosh sound when dragging / fanning out polaroids
+      function playWhooshSound() {
+        if (!soundEnabled) return;
+        try {
+          const ctx = getContext();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const now = ctx.currentTime;
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(480, now + 0.12);
+
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.14);
+        } catch(e) {}
+      }
+
+      // Cheerful chime chord when blowing candle or celebrating
+      function playCelebrationChime() {
+        if (!soundEnabled) return;
+        try {
+          const ctx = getContext();
+          if (!ctx) return;
+          const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const now = ctx.currentTime + idx * 0.07;
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now);
+
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.75);
+          });
+        } catch(e) {}
+      }
+
+      function toggleSound() {
+        soundEnabled = !soundEnabled;
+        return soundEnabled;
+      }
+
+      function isEnabled() {
+        return soundEnabled;
+      }
+
+      return { playClickSound, playWhooshSound, playCelebrationChime, toggleSound, isEnabled, getContext };
+    })();
+
+    // Global click sound on all interactions
+    window.addEventListener('pointerdown', (e) => {
+      // Don't trigger if dragging canvas directly
+      SoundEffects.playClickSound();
+    });
+
+    /* =========================================================================
+       2. AMBIENT PARTICLES (Hearts, Sparkles, Floating Bubbles)
+       ========================================================================= */
+    const AmbientCanvas = (() => {
+      const canvas = document.getElementById('ambient-canvas');
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      let width, height;
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      class Sparkle {
+        constructor() {
+          this.reset(true);
+        }
+        reset(initial = false) {
+          this.x = Math.random() * width;
+          this.y = initial ? Math.random() * height : height + 20;
+          this.size = Math.random() * 4 + 2;
+          this.speedY = Math.random() * 0.9 + 0.3;
+          this.speedX = (Math.random() - 0.5) * 0.6;
+          this.opacity = Math.random() * 0.7 + 0.2;
+          this.color = ['#ff758c', '#ffdd67', '#00f2fe', '#fff', '#e0c3fc'][Math.floor(Math.random() * 5)];
+          this.isHeart = Math.random() > 0.65;
+          this.angle = Math.random() * Math.PI * 2;
+          this.spin = (Math.random() - 0.5) * 0.03;
+        }
+        update() {
+          this.y -= this.speedY;
+          this.x += Math.sin(this.angle) * 0.5 + this.speedX;
+          this.angle += this.spin;
+          if (this.y < -30) this.reset();
+        }
+        draw() {
+          ctx.save();
+          ctx.globalAlpha = this.opacity;
+          ctx.translate(this.x, this.y);
+          if (this.isHeart) {
+            ctx.fillStyle = this.color;
+            ctx.scale(this.size * 0.18, this.size * 0.18);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-5, -5, -10, 0, 0, 10);
+            ctx.bezierCurveTo(10, 0, 5, -5, 0, 0);
+            ctx.fill();
+          } else {
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = this.color;
+            ctx.beginPath();
+            ctx.arc(0, 0, this.size * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+      }
+
+      for (let i = 0; i < 45; i++) {
+        particles.push(new Sparkle());
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p => {
+          p.update();
+          p.draw();
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    /* =========================================================================
+       3. CONFETTI BURST ENGINE (Pháo hoa giấy bay tung tóe)
+       ========================================================================= */
+    const ConfettiEngine = (() => {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      let confettiPieces = [];
+      let width, height;
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      class Confetti {
+        constructor(originX, originY) {
+          this.x = originX;
+          this.y = originY;
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 15 + 8;
+          this.vx = Math.cos(angle) * speed;
+          this.vy = Math.sin(angle) * speed - 6;
+          this.gravity = 0.35;
+          this.friction = 0.96;
+          this.size = Math.random() * 10 + 6;
+          this.color = ['#ff3366', '#00f2fe', '#ffd166', '#70d6ff', '#ff9f1c', '#ffffff'][Math.floor(Math.random() * 6)];
+          this.rotation = Math.random() * 360;
+          this.rotationSpeed = (Math.random() - 0.5) * 18;
+          this.opacity = 1;
+        }
+        update() {
+          this.vx *= this.friction;
+          this.vy = this.vy * this.friction + this.gravity;
+          this.x += this.vx;
+          this.y += this.vy;
+          this.rotation += this.rotationSpeed;
+          this.opacity -= 0.012;
+        }
+        draw() {
+          if (this.opacity <= 0) return;
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, this.opacity);
+          ctx.translate(this.x, this.y);
+          ctx.rotate((this.rotation * Math.PI) / 180);
+          ctx.fillStyle = this.color;
+          ctx.fillRect(-this.size / 2, -this.size / 3, this.size, this.size * 0.7);
+          ctx.restore();
+        }
+      }
+
+      function burst(x = width / 2, y = height / 2, amount = 100) {
+        SoundEffects.playCelebrationChime();
+        for (let i = 0; i < amount; i++) {
+          confettiPieces.push(new Confetti(x, y));
+        }
+      }
+
+      function loop() {
+        ctx.clearRect(0, 0, width, height);
+        for (let i = confettiPieces.length - 1; i >= 0; i--) {
+          const c = confettiPieces[i];
+          c.update();
+          c.draw();
+          if (c.opacity <= 0 || c.y > height + 50) {
+            confettiPieces.splice(i, 1);
+          }
+        }
+        requestAnimationFrame(loop);
+      }
+      loop();
+
+      return { burst };
+    })();
+
+    /* =========================================================================
+       4. DEFAULT STATE & LOCAL STORAGE SYNC
+       ========================================================================= */
+    const DEFAULT_DATA = {
+      title: "Happy Birthday! 🎂",
+      subtitle: "✨ Chúc bạn một tuổi mới rực rỡ và ngập tràn hạnh phúc ✨",
+      ledTexts: [
+        "HAPPY BIRTHDAY",
+        "TUỔI MỚI THẬT NHIỀU NIỀM VUI",
+        "LUÔN RẠNG NGỜI VÀ XINH ĐẸP",
+        "VẠN DẶM BÌNH AN",
+        "MAKE A WISH & SHINE BRIGHT"
+      ],
+      wish: "Chúc bạn tuổi mới luôn rực rỡ như những đóa hoa, thành công rực rỡ trong sự nghiệp, luôn bình an, mạnh khỏe và được bao bọc bởi tình yêu thương!",
+      background: "background/starnight.svg",
+      photos: [
+        {
+          id: 'sample-1',
+          url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%23ff758c"/><stop offset="100%" stop-color="%23ff7eb3"/></linearGradient></defs><rect width="400" height="400" fill="url(%23g1)"/><circle cx="200" cy="180" r="70" fill="%23fff" opacity="0.9"/><text x="200" y="195" font-size="60" text-anchor="middle">🌸</text><text x="200" y="310" font-family="sans-serif" font-weight="bold" font-size="22" fill="%23ffffff" text-anchor="middle">Sweet Moment</text></svg>',
+          caption: "Khoảnh khắc đáng nhớ",
+          badge: "Best Smile "
+        },
+        {
+          id: 'sample-2',
+          url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%23667eea"/><stop offset="100%" stop-color="%23764ba2"/></linearGradient></defs><rect width="400" height="400" fill="url(%23g2)"/><circle cx="200" cy="180" r="70" fill="%23fff" opacity="0.9"/><text x="200" y="195" font-size="60" text-anchor="middle">🎂</text><text x="200" y="310" font-family="sans-serif" font-weight="bold" font-size="22" fill="%23ffffff" text-anchor="middle">Birthday Vibes</text></svg>',
+          caption: "Bữa tiệc sinh nhật ",
+          badge: "Special Day "
+        },
+        {
+          id: 'sample-3',
+          url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><defs><linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%23f093fb"/><stop offset="100%" stop-color="%23f5576c"/></linearGradient></defs><rect width="400" height="400" fill="url(%23g3)"/><circle cx="200" cy="180" r="70" fill="%23fff" opacity="0.9"/><text x="200" y="195" font-size="60" text-anchor="middle">💖</text><text x="200" y="310" font-family="sans-serif" font-weight="bold" font-size="22" fill="%23ffffff" text-anchor="middle">Forever Youth</text></svg>',
+          caption: "Tuổi mới thật rực rỡ ",
+          badge: "Loved "
+        },
+        {
+          id: 'sample-4',
+          url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><defs><linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%234facfe"/><stop offset="100%" stop-color="%2300f2fe"/></linearGradient></defs><rect width="400" height="400" fill="url(%23g4)"/><circle cx="200" cy="180" r="70" fill="%23fff" opacity="0.9"/><text x="200" y="195" font-size="60" text-anchor="middle">🌟</text><text x="200" y="310" font-family="sans-serif" font-weight="bold" font-size="22" fill="%23ffffff" text-anchor="middle">Shine Bright</text></svg>',
+          caption: "Ước mơ thành hiện thực ",
+          badge: "Shining Star "
+        }
+      ]
+    };
+
+    let AppState = (function loadState() {
+      try {
+        // State nhúng sẵn trong file đã xuất có ưu tiên cao nhất
+        const embedded = window.__HPBD_STATE__;
+        const stored = embedded || JSON.parse(localStorage.getItem('hpbd_celebration_state') || 'null');
+        if (stored && typeof stored === 'object') {
+          const merged = { ...DEFAULT_DATA, ...stored };
+          if (!Array.isArray(merged.photos)) merged.photos = [];
+          return merged;
+        }
+      } catch(e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_DATA));
+    })();
+
+    function saveState() {
+      try {
+        localStorage.setItem('hpbd_celebration_state', JSON.stringify(AppState));
+      } catch(e) {
+        console.warn('Storage quota exceeded or error:', e);
+        showToast('⚠️ Bộ nhớ trình duyệt đầy — hãy xóa bớt ảnh hoặc dùng ảnh nền nhỏ hơn.');
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-notice');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    /* =========================================================================
+       5. LED TICKER RENDERER (DÒNG CHỮ ĐÈN LED CHẠY & NHẤP NHÁY)
+       ========================================================================= */
+    function renderLED() {
+      const track = document.getElementById('led-track');
+      track.innerHTML = '';
+
+      const items = (AppState.ledTexts && AppState.ledTexts.length > 0) 
+        ? AppState.ledTexts 
+        : ["HAPPY BIRTHDAY", "CHÚC MỪNG SINH NHẬT"];
+
+      // Duplicate list twice to make an infinite seamless smooth loop
+      const combined = [...items, ...items];
+      combined.forEach(txt => {
+        const div = document.createElement('div');
+        div.className = 'led-text-item';
+        div.innerHTML = `<span>${escapeHTML(txt)}</span><span class="dot-divider">✦</span>`;
+        track.appendChild(div);
+      });
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+    }
+
+    /* =========================================================================
+       6. POLAROID DECK CARDS INTERACTIVE LOGIC (DÀN BÀI & KÉO ẢNH NHƯ KÉO BÀI)
+       ========================================================================= */
+    let deckMode = 'fanned'; // 'fanned', 'stacked', 'scattered'
+    let highestZIndex = 200;
+
+    function renderDeck() {
+      const container = document.getElementById('deck-container');
+      container.innerHTML = '';
+
+      if (!AppState.photos || AppState.photos.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding-top:80px; color:#cbd5e1;">
+            <p>Chưa có bức ảnh nào trong album.</p>
+            <button class="tool-btn primary" id="btn-empty-add" style="margin-top:15px;">➕ Bấm vào đây để thêm ảnh</button>
+          </div>
+        `;
+        document.getElementById('btn-empty-add')?.addEventListener('click', openCropperModal);
+        return;
+      }
+
+      const total = AppState.photos.length;
+      AppState.photos.forEach((photo, index) => {
+        const card = document.createElement('div');
+        card.className = 'polaroid-card';
+        card.dataset.id = photo.id;
+        card.dataset.index = index;
+
+        // Custom square frame with 3D Flip capability
+        card.innerHTML = `
+          <div class="polaroid-card-inner">
+            <div class="polaroid-front">
+              <div class="polaroid-photo-frame">
+                <img class="polaroid-img" src="${photo.url}" alt="${escapeHTML(photo.caption || 'Polaroid')}">
+              </div>
+              <div class="polaroid-caption">${escapeHTML(photo.caption || 'Birthday Memory ✨')}</div>
+              ${photo.badge ? `<div class="polaroid-badge">${escapeHTML(photo.badge)}</div>` : ''}
+              <button class="polaroid-flip-btn" title="Lật mặt sau để xem lời nhắn bí mật">🔄 Lật xem thư</button>
+            </div>
+            <div class="polaroid-back">
+              <div class="polaroid-back-header">
+                <span style="font-size:12px; font-weight:700; color:#888;">POLAROID POSTCARD</span>
+                <div class="polaroid-stamp">🎂</div>
+              </div>
+              <div class="polaroid-back-text">
+                ${escapeHTML(photo.note || photo.caption || "Một khoảnh khắc vô giá ngập tràn niềm vui và tiếng cười. Chúc bạn luôn rạng rỡ và hạnh phúc trong từng giây phút!")}
+              </div>
+              <button class="polaroid-flip-btn" style="bottom:10px;" title="Lật lại mặt trước">↩️ Mặt trước</button>
+            </div>
+          </div>
+        `;
+
+        // Flip button event
+        card.querySelectorAll('.polaroid-flip-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            card.classList.toggle('is-flipped');
+            SoundEffects.playWhooshSound();
+          });
+        });
+
+        container.appendChild(card);
+        initCardDrag(card);
+      });
+
+      applyDeckLayout(deckMode);
+    }
+
+    function applyDeckLayout(mode) {
+      deckMode = mode;
+      const cards = document.querySelectorAll('.polaroid-card');
+      const total = cards.length;
+      if (total === 0) return;
+
+      cards.forEach((card, index) => {
+        card.classList.remove('card-fanned');
+        let transformStr = '';
+        let z = index + 10;
+
+        if (mode === 'fanned') {
+          // Xòe bài ra như những lá bài tỏa quạt
+          card.classList.add('card-fanned');
+          const stepAngle = total > 1 ? 32 / (total - 1) : 0;
+          const angle = -16 + index * stepAngle;
+          const stepX = total > 1 ? 260 / (total - 1) : 0;
+          const offsetX = -130 + index * stepX;
+          const offsetY = Math.abs(angle) * 1.8;
+          transformStr = `translateX(${offsetX}px) translateY(${offsetY}px) rotate(${angle}deg)`;
+        } else if (mode === 'stacked') {
+          // Gom bài thành 1 sấp gọn gàng
+          const rot = (index % 3 - 1) * 3;
+          transformStr = `translateY(${index * -2}px) rotate(${rot}deg)`;
+        } else if (mode === 'scattered') {
+          // Rải ngẫu nhiên trên bàn tiệc
+          const rx = (Math.sin(index * 99) * 160);
+          const ry = (Math.cos(index * 99) * 40);
+          const rr = (Math.sin(index * 55) * 22);
+          transformStr = `translateX(${rx}px) translateY(${ry}px) rotate(${rr}deg)`;
+        }
+
+        card.style.transform = transformStr;
+        card.style.zIndex = z;
+        card.dataset.originalTransform = transformStr;
+      });
+
+      SoundEffects.playWhooshSound();
+    }
+
+    // Interactive Dragging / Pulling up Cards (KÉO TỪNG BỨC ẢNH LÊN)
+    function initCardDrag(card) {
+      let isDragging = false;
+      let startX = 0, startY = 0;
+      let currentX = 0, currentY = 0;
+      let initialTransform = '';
+
+      function onPointerDown(e) {
+        // Only main button
+        if (e.button !== undefined && e.button !== 0) return;
+        if (e.target.closest('.polaroid-flip-btn')) return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        currentX = 0;
+        currentY = 0;
+
+        card.classList.add('is-dragging');
+        highestZIndex += 1;
+        card.style.zIndex = highestZIndex;
+        initialTransform = card.dataset.originalTransform || '';
+
+        SoundEffects.playWhooshSound();
+
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointercancel', onPointerUp);
+      }
+
+      function onPointerMove(e) {
+        if (!isDragging) return;
+        currentX = e.clientX - startX;
+        currentY = e.clientY - startY;
+
+        const rot = currentX * 0.08;
+        card.style.transform = `${initialTransform} translate(${currentX}px, ${currentY}px) rotate(${rot}deg) scale(1.06)`;
+      }
+
+      function onPointerUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        card.classList.remove('is-dragging');
+
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerUp);
+
+        // If pulled up high (> 120px up), animate celebrating inspection!
+        if (currentY < -120) {
+          ConfettiEngine.burst(window.innerWidth / 2, window.innerHeight * 0.45, 45);
+          showToast(`✨ Đang xem ảnh: ${card.querySelector('.polaroid-caption').textContent}`);
+          // Place smoothly in top center focus then gentle settle
+          card.style.transition = 'transform 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28)';
+          card.style.transform = `translateX(0px) translateY(-80px) rotate(0deg) scale(1.15)`;
+          card.dataset.originalTransform = card.style.transform;
+        } else {
+          // Snap back smoothly
+          card.style.transition = 'transform 0.4s ease';
+          card.style.transform = initialTransform;
+        }
+      }
+
+      card.addEventListener('pointerdown', onPointerDown);
+    }
+
+    /* Deck controls event binding */
+    document.getElementById('btn-fan-cards').addEventListener('click', () => applyDeckLayout('fanned'));
+    document.getElementById('btn-stack-cards').addEventListener('click', () => applyDeckLayout('stacked'));
+    document.getElementById('btn-random-scatter').addEventListener('click', () => applyDeckLayout('scattered'));
+
+    // Pull next card to top
+    document.getElementById('btn-next-card').addEventListener('click', () => {
+      const cards = Array.from(document.querySelectorAll('.polaroid-card'));
+      if (cards.length <= 1) return;
+      // Cycle top card to back
+      const first = AppState.photos.shift();
+      AppState.photos.push(first);
+      renderDeck();
+      SoundEffects.playWhooshSound();
+    });
+
+    /* =========================================================================
+       7. SQUARE IMAGE CROPPER & PAN/ZOOM ADJUSTER (CẮT ẢNH VUÔNG CHUẨN POLAROID)
+       ========================================================================= */
+    const Cropper = (() => {
+      const modal = document.getElementById('cropper-modal');
+      const fileInput = document.getElementById('file-photo-input');
+      const previewImg = document.getElementById('crop-preview-img');
+      const viewport = document.getElementById('crop-viewport');
+      const zoomSlider = document.getElementById('crop-zoom-slider');
+      const captionInput = document.getElementById('input-photo-caption');
+      const confirmBtn = document.getElementById('btn-confirm-crop');
+
+      let currentImageDataUrl = '';
+      let posX = 0, posY = 0;
+      let zoom = 1;
+      let isPanning = false;
+      let panStartX = 0, panStartY = 0;
+      let imgNaturalW = 0, imgNaturalH = 0;
+
+      function updateTransform() {
+        previewImg.style.transform = `translate(${posX}px, ${posY}px) scale(${zoom})`;
+      }
+
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          currentImageDataUrl = ev.target.result;
+          previewImg.onload = () => {
+            imgNaturalW = previewImg.naturalWidth;
+            imgNaturalH = previewImg.naturalHeight;
+            // Fit to viewport
+            const minSide = Math.min(imgNaturalW, imgNaturalH);
+            const initialScale = 250 / minSide;
+            previewImg.style.width = `${imgNaturalW * initialScale}px`;
+            previewImg.style.height = `${imgNaturalH * initialScale}px`;
+            posX = (250 - (imgNaturalW * initialScale)) / 2;
+            posY = (250 - (imgNaturalH * initialScale)) / 2;
+            zoom = 1;
+            zoomSlider.value = 1;
+            updateTransform();
+          };
+          previewImg.src = currentImageDataUrl;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      zoomSlider.addEventListener('input', (e) => {
+        zoom = parseFloat(e.target.value);
+        updateTransform();
+      });
+
+      // Pan dragging within the square crop frame
+      viewport.addEventListener('pointerdown', (e) => {
+        if (!currentImageDataUrl) return;
+        isPanning = true;
+        panStartX = e.clientX - posX;
+        panStartY = e.clientY - posY;
+        viewport.setPointerCapture(e.pointerId);
+      });
+
+      viewport.addEventListener('pointermove', (e) => {
+        if (!isPanning) return;
+        posX = e.clientX - panStartX;
+        posY = e.clientY - panStartY;
+        updateTransform();
+      });
+
+      function stopPan(e) {
+        isPanning = false;
+        try { viewport.releasePointerCapture(e.pointerId); } catch(err) {}
+      }
+      viewport.addEventListener('pointerup', stopPan);
+      viewport.addEventListener('pointercancel', stopPan);
+
+      // Render square cropped image on a real canvas to output crisp square thumbnail
+      confirmBtn.addEventListener('click', () => {
+        if (!currentImageDataUrl) {
+          alert('Vui lòng chọn 1 file ảnh trước khi lưu!');
+          return;
+        }
+
+        const canvas = document.createElement('canvas');
+        const size = 500; // high quality square output
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Calculate actual render transform on 500x500
+        const scaleRatio = size / 250;
+        const img = new Image();
+        img.onload = () => {
+          ctx.fillStyle = '#000';
+          ctx.fillRect(0, 0, size, size);
+
+          // Get image bounding in viewport
+          const rect = previewImg.getBoundingClientRect();
+          const viewRect = viewport.getBoundingClientRect();
+
+          const drawX = (rect.left - viewRect.left) * scaleRatio;
+          const drawY = (rect.top - viewRect.top) * scaleRatio;
+          const drawW = rect.width * scaleRatio;
+          const drawH = rect.height * scaleRatio;
+
+          ctx.drawImage(img, drawX, drawY, drawW, drawH);
+
+          const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+          const newPhoto = {
+            id: 'photo-' + Date.now(),
+            url: croppedDataUrl,
+            caption: captionInput.value.trim() || 'Kỷ niệm tuyệt đẹp ✨',
+            badge: 'New 🌟'
+          };
+
+          AppState.photos.unshift(newPhoto);
+          saveState();
+          renderDeck();
+          renderPhotoModalList();
+          closeModal('cropper-modal');
+          showToast('Đã thêm ảnh Polaroid vuông thành công! 📸');
+          ConfettiEngine.burst(window.innerWidth / 2, window.innerHeight / 2, 40);
+        };
+        img.src = currentImageDataUrl;
+      });
+
+      function open() {
+        fileInput.value = '';
+        captionInput.value = '';
+        zoomSlider.value = 1;
+        zoom = 1;
+        posX = posY = 0;
+        currentImageDataUrl = '';
+        previewImg.removeAttribute('src');
+        previewImg.style.transform = '';
+        openModal('cropper-modal');
+      }
+
+      return { open };
+    })();
+
+    function openCropperModal() {
+      Cropper.open();
+    }
+    document.getElementById('btn-add-quick-photo').addEventListener('click', openCropperModal);
+    document.getElementById('btn-open-cropper-from-modal').addEventListener('click', openCropperModal);
+
+    /* =========================================================================
+       8. MODAL MANAGERS & EDIT SETTINGS
+       ========================================================================= */
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        closeModal(btn.dataset.close);
+      });
+    });
+
+    // Esc để đóng modal đang mở
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+    });
+
+    // Close on overlay backdrop click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove('open');
+        }
+      });
+    });
+
+    // Render photo list in edit modal
+    function renderPhotoModalList() {
+      const container = document.getElementById('modal-photo-list');
+      const countEl = document.getElementById('photo-count');
+      countEl.textContent = AppState.photos.length;
+      container.innerHTML = '';
+
+      if (AppState.photos.length === 0) {
+        container.innerHTML = `<p style="font-size:12px; color:#94a3b8; padding:8px;">Chưa có ảnh nào.</p>`;
+        return;
+      }
+
+      AppState.photos.forEach((photo, idx) => {
+        const item = document.createElement('div');
+        item.className = 'photo-list-item';
+        item.innerHTML = `
+          <img class="item-thumb" src="${photo.url}" alt="thumb">
+          <div class="item-info">
+            <div class="item-caption-text">${escapeHTML(photo.caption || 'Polaroid')}</div>
+            <small style="color:#94a3b8; font-size:11px;">#${idx + 1}</small>
+          </div>
+          <div class="item-actions">
+            <button class="item-btn delete" data-delete-id="${photo.id}">Xóa</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+
+      container.querySelectorAll('[data-delete-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.deleteId;
+          AppState.photos = AppState.photos.filter(p => p.id !== id);
+          saveState();
+          renderPhotoModalList();
+          renderDeck();
+          showToast('Đã xóa bức ảnh.');
+        });
+      });
+    }
+
+    // Open Edit Modal & Populate current values
+    document.getElementById('btn-edit-content').addEventListener('click', () => {
+      document.getElementById('input-title').value = AppState.title || '';
+      document.getElementById('input-subtitle').value = AppState.subtitle || '';
+      document.getElementById('input-led-text').value = (AppState.ledTexts || []).join(' • ');
+      document.getElementById('input-wish-text').value = AppState.wish || '';
+      document.getElementById('input-secret-letter').value = AppState.secretLetter || '';
+      renderPhotoModalList();
+      openModal('edit-modal');
+    });
+
+    // Save Settings from Edit Modal
+    document.getElementById('btn-save-settings').addEventListener('click', () => {
+      AppState.title = document.getElementById('input-title').value.trim() || DEFAULT_DATA.title;
+      AppState.subtitle = document.getElementById('input-subtitle').value.trim() || DEFAULT_DATA.subtitle;
+      AppState.wish = document.getElementById('input-wish-text').value.trim() || DEFAULT_DATA.wish;
+      AppState.secretLetter = document.getElementById('input-secret-letter').value.trim();
+
+      const rawLed = document.getElementById('input-led-text').value;
+      const ledList = rawLed.split(/[,•\n]+/).map(s => s.trim()).filter(Boolean);
+      AppState.ledTexts = ledList.length > 0 ? ledList : DEFAULT_DATA.ledTexts;
+
+      saveState();
+      applyAppStateToDOM();
+      closeModal('edit-modal');
+      showToast('Đã cập nhật nội dung thành công! 💖');
+    });
+
+    // Save and View final output button
+    document.getElementById('btn-save-view').addEventListener('click', () => {
+      saveState();
+      ConfettiEngine.burst(window.innerWidth / 2, window.innerHeight * 0.35, 90);
+      showToast('🎉 Trang web thành phẩm đã sẵn sàng! Chúc mừng sinh nhật!');
+    });
+
+    /* =========================================================================
+       9. BACKGROUND PICKER & CUSTOM FILE / PATH HANDLER
+       ========================================================================= */
+    const bgModal = document.getElementById('bg-modal');
+    document.getElementById('btn-toggle-bg').addEventListener('click', () => {
+      openModal('bg-modal');
+    });
+
+    function applyBackground(bgUrl) {
+      AppState.background = bgUrl;
+      document.body.style.backgroundImage = `url('${bgUrl}')`;
+      // Update active tile
+      document.querySelectorAll('.bg-tile').forEach(tile => {
+        if (tile.dataset.bg === bgUrl) tile.classList.add('active');
+        else tile.classList.remove('active');
+      });
+      saveState();
+    }
+
+    // Preset background tiles in folder background/
+    document.querySelectorAll('.bg-tile').forEach(tile => {
+      tile.addEventListener('click', () => {
+        applyBackground(tile.dataset.bg);
+        showToast('Đã đổi background! 🎨');
+      });
+    });
+
+    // Custom path inside folder background
+    document.getElementById('btn-apply-custom-path').addEventListener('click', () => {
+      const val = document.getElementById('custom-bg-path').value.trim();
+      if (val) {
+        applyBackground(val);
+        showToast(`Đã áp dụng background: ${val}`);
+        closeModal('bg-modal');
+      }
+    });
+
+    // Custom background file upload from computer
+    document.getElementById('custom-bg-file').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        applyBackground(ev.target.result);
+        showToast('Đã cập nhật background từ ảnh của bạn! ✨');
+        closeModal('bg-modal');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    /* =========================================================================
+       10. SOUND TOGGLE BUTTON
+       ========================================================================= */
+    const btnToggleSound = document.getElementById('btn-toggle-sound');
+    const soundIndicator = document.getElementById('sound-indicator');
+    btnToggleSound.addEventListener('click', () => {
+      const isNowOn = SoundEffects.toggleSound();
+      if (isNowOn) {
+        soundIndicator.style.background = '#10b981';
+        soundIndicator.style.boxShadow = '0 0 6px #10b981';
+        showToast('🔊 Đã bật âm thanh click!');
+      } else {
+        soundIndicator.style.background = '#64748b';
+        soundIndicator.style.boxShadow = 'none';
+        showToast('🔇 Đã tắt âm thanh.');
+      }
+    });
+
+    /* =========================================================================
+       11. INTERACTIVE BIRTHDAY CAKE & BLOWING CANDLE
+       ========================================================================= */
+    let candleBlown = false;
+    const cakeContainer = document.getElementById('birthday-cake');
+    const candleFlame = document.getElementById('candle-flame');
+    const cakeStatusText = document.getElementById('cake-status-text');
+
+    cakeContainer.addEventListener('click', (e) => {
+      candleBlown = !candleBlown;
+      if (candleBlown) {
+        candleFlame.style.display = 'none';
+        cakeStatusText.innerHTML = '🎉 Nến đã được thổi! Ước nguyện sẽ trở thành hiện thực ✨ (Click lại để thắp nến)';
+        ConfettiEngine.burst(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight * 0.7, 120);
+        showToast('🎂 Make a wish and let the magic happen! ✨');
+      } else {
+        candleFlame.style.display = 'block';
+        cakeStatusText.innerHTML = '👉 Click vào chiếc bánh để thổi nến & bắn pháo hoa giấy! 🎉';
+        SoundEffects.playClickSound();
+      }
+    });
+
+    /* =========================================================================
+       12. HAPPY BIRTHDAY MUSIC BOX SYNTHESIZER (ZERO ASSET, PURE CHIME)
+       ========================================================================= */
+    const MusicBox = (() => {
+      let isPlaying = false;
+      let timerId = null;
+
+      // Happy Birthday Melody in Frequency (Hz) and Durations
+      // G4, G4, A4, G4, C5, B4 | G4, G4, A4, G4, D5, C5 | G4, G4, G5, E5, C5, B4, A4 | F5, F5, E5, C5, D5, C5
+      const notes = [
+        { f: 392.00, d: 350 }, { f: 392.00, d: 350 }, { f: 440.00, d: 650 }, { f: 392.00, d: 650 }, { f: 523.25, d: 650 }, { f: 493.88, d: 1100 },
+        { f: 392.00, d: 350 }, { f: 392.00, d: 350 }, { f: 440.00, d: 650 }, { f: 392.00, d: 650 }, { f: 587.33, d: 650 }, { f: 523.25, d: 1100 },
+        { f: 392.00, d: 350 }, { f: 392.00, d: 350 }, { f: 783.99, d: 650 }, { f: 659.25, d: 650 }, { f: 523.25, d: 650 }, { f: 493.88, d: 650 }, { f: 440.00, d: 1100 },
+        { f: 698.46, d: 350 }, { f: 698.46, d: 350 }, { f: 659.25, d: 650 }, { f: 523.25, d: 650 }, { f: 587.33, d: 650 }, { f: 523.25, d: 1200 }
+      ];
+
+      function playNote(freq, duration) {
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return;
+          const ctx = SoundEffects.getContext(); // dùng chung 1 AudioContext (trình duyệt giới hạn số context)
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+          // Crystalline music box bell attack & decay
+          gain.gain.setValueAtTime(0.001, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (duration / 1000) * 1.5);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start();
+          osc.stop(ctx.currentTime + (duration / 1000) * 1.6);
+        } catch(e) {}
+      }
+
+      function startSequence(step = 0) {
+        if (!isPlaying) return;
+        const current = notes[step % notes.length];
+        playNote(current.f, current.d);
+
+        timerId = setTimeout(() => {
+          if (isPlaying) {
+            startSequence(step + 1);
+          }
+        }, current.d + 120);
+      }
+
+      function toggle() {
+        isPlaying = !isPlaying;
+        const btn = document.getElementById('btn-toggle-music');
+        if (isPlaying) {
+          btn.classList.add('active');
+          btn.innerHTML = '🎶 Đang phát nhạc...';
+          showToast('🎵 Đang phát nhạc Happy Birthday hộp nhạc ✨');
+          startSequence(0);
+        } else {
+          btn.classList.remove('active');
+          btn.innerHTML = '🎵 Nhạc sinh nhật';
+          clearTimeout(timerId);
+          showToast('🔇 Đã dừng nhạc.');
+        }
+      }
+
+      return { toggle };
+    })();
+
+    document.getElementById('btn-toggle-music').addEventListener('click', MusicBox.toggle);
+
+    /* =========================================================================
+       13. SURPRISE GIFT BOX & SECRET LETTER
+       ========================================================================= */
+    const giftModal = document.getElementById('gift-modal');
+    const giftBoxClicker = document.getElementById('gift-box-clicker');
+    const secretLetterBox = document.getElementById('secret-letter-box');
+    const displaySecretLetter = document.getElementById('display-secret-letter');
+    const giftBoxHint = document.getElementById('gift-box-hint');
+
+    document.getElementById('btn-open-gift').addEventListener('click', () => {
+      displaySecretLetter.textContent = AppState.secretLetter || DEFAULT_DATA.secretLetter || displaySecretLetter.textContent;
+      giftBoxClicker.textContent = '🎁';
+      giftBoxHint.innerHTML = '✨ Bấm vào hộp quà để mở điều bất ngờ!';
+      secretLetterBox.style.display = 'none';
+      openModal('gift-modal');
+    });
+
+    giftBoxClicker.addEventListener('click', (e) => {
+      SoundEffects.playCelebrationChime();
+      ConfettiEngine.burst(e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight / 2, 100);
+      giftBoxClicker.textContent = '🎉';
+      giftBoxHint.innerHTML = '✨ Hộp quà đã mở! Đọc bức thư bên dưới nhé 💌';
+      secretLetterBox.style.display = 'block';
+    });
+
+    /* =========================================================================
+       14. EXPORT STANDALONE HTML FILE (GỬI TẶNG DỄ DÀNG)
+       ========================================================================= */
+    document.getElementById('btn-export-html').addEventListener('click', () => {
+      saveState();
+      // Embed current appState directly into the exported document
+      // Dùng HTML gốc (chưa render) + nhúng state vào <head> để file tự chạy độc lập
+      const clone = document.documentElement.cloneNode(true);
+      clone.querySelectorAll('#hpbd-embedded-state').forEach(n => n.remove());
+      clone.querySelectorAll('.modal-overlay.open, .toast-notice.show').forEach(n => n.classList.remove('open', 'show'));
+      const safeJson = JSON.stringify(AppState).replace(/</g, '\\u003c');
+      const injection = `<script id="hpbd-embedded-state">window.__HPBD_STATE__ = ${safeJson};<\/script>`;
+      let fullHtml = '<!DOCTYPE html>\n' + clone.outerHTML.replace('</head>', `${injection}</head>`);
+
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'HappyBirthday_Gift.html';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('📥 Đã xuất file HappyBirthday_Gift.html thành công!');
+    });
+
+    /* =========================================================================
+       15. INITIALIZATION
+       ========================================================================= */
+    function applyAppStateToDOM() {
+      document.getElementById('display-title').textContent = AppState.title || DEFAULT_DATA.title;
+      document.getElementById('display-subtitle').textContent = AppState.subtitle || DEFAULT_DATA.subtitle;
+      document.getElementById('display-wish').textContent = AppState.wish || DEFAULT_DATA.wish;
+      document.body.style.backgroundImage = `url('${AppState.background || DEFAULT_DATA.background}')`;
+      renderLED();
+      renderDeck();
+    }
+
+    applyAppStateToDOM();
+
+    // Welcome celebratory gentle burst on load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        ConfettiEngine.burst(window.innerWidth / 2, window.innerHeight * 0.35, 60);
+      }, 700);
+    });
+  </script>
+</body>
+</html>
